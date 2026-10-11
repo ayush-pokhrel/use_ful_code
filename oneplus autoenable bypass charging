@@ -1,0 +1,30 @@
+### oneplus auto enable bypass charging using abd
+----------------------------------------------------
+
+This script runs forever in the background, waits for your Pad to connect via ADB, then enables bypass charging once.
+
+-> nvim ~/.local/bin/bypassd:
+
+```bash
+#!/usr/bin/env bash
+
+while true; do
+    adb wait-for-device
+    sleep 3
+    adb shell cmd statusbar click-tile \
+        com.oplus.battery/com.oplus.powermanager.fuelgaue.bypasscharge.BypassChargeTile >/dev/null 2>&1
+    adb wait-for-disconnect
+done
+```
+
+-> chmod +x ~/.local/bin/bypassd
+
+-> ~/.local/bin/bypassd &
+
+-----------------------------------------------------
+Now whenever you:
+1. Plug in the Pad.
+2. ADB connects.
+3. Wait ~3 seconds.
+➡️ Bypass charging is enabled automatically.
+-----------------------------------------------------
