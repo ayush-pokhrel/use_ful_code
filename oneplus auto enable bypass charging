@@ -1,4 +1,4 @@
-### oneplus auto enable bypass charging using abd
+### oneplus auto enable bypass charging using adb
 ----------------------------------------------------
 
 This script runs forever in the background, waits for your Pad to connect via ADB, then enables bypass charging once.
@@ -28,3 +28,70 @@ Now whenever you:
 3. Wait ~3 seconds.
 ➡️ Bypass charging is enabled automatically.
 -----------------------------------------------------
+proble with the code for me : it enable and disables the bypass charging when you open terminal like multiple terminal = on off on off etc.
+In my case i was using fish so it might have cause the problem i am not sure.
+-----------------------------------------------------
+
+
+
+---
+---
+---
+---
+#### using usb state not adb state
+
+-----------------------------------------------------
+
+-> mkdir -p ~/.local/bin
+-> ~/.local/bin/bypassd
+
+```bash
+#!/usr/bin/env bash
+
+last=""
+
+while true; do
+    current=$(adb devices | awk 'NR==2 {print $2}')
+
+    if [[ "$current" == "device" && "$last" != "device" ]]; then
+        sleep 3
+        adb shell cmd statusbar click-tile \
+            com.oplus.battery/com.oplus.powermanager.fuelgaue.bypasscharge.BypassChargeTile
+    fi
+
+    last="$current"
+    sleep 2
+done
+```
+
+-> chmod +x ~/.local/bin/bypassd
+
+-> nvim ~/.config/systemd/user/bypassd.service
+
+```bash
+[Unit]
+Description=OnePlus Pad 3 Bypass Charging
+
+[Service]
+ExecStart=%h/.local/bin/bypassd
+Restart=always
+
+[Install]
+WantedBy=default.target
+```
+
+* enable it
+-> systemctl --user daemon-reload
+-> systemctl --user enable --now bypassd.service
+
+* check if it's running
+-> systemctl --user status bypassd.service
+
+* if you want to stop it
+-> systemctl --user stop bypassd.service
+
+* if you want to delete it 
+-> systemctl --user disable bypassd.service
+
+
+---
