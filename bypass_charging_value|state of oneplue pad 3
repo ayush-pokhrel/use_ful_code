@@ -1,0 +1,62 @@
+The Battery app is literally doing:
+
+```java
+Settings.System.putInt(..., "bypass_charge_state", state);
+Settings.System.putInt(..., "bypass_charge_value", limit);
+```
+
+So your ADB commands are **officially equivalent** to changing the settings in the UI.
+
+For future reference:
+
+```bash
+# Set charging limit
+adb shell settings put system bypass_charge_value 80
+
+# Read charging limit
+adb shell settings get system bypass_charge_value
+
+# Enable bypass charging
+adb shell settings put system bypass_charge_state 1
+
+# Disable bypass charging
+adb shell settings put system bypass_charge_state 0
+
+# Read state
+adb shell settings get system bypass_charge_state
+```
+
+You can even make it a one-liner:
+
+```bash
+adb shell 'settings put system bypass_charge_value 80 && settings put system bypass_charge_state 1'
+```
+
+or disable it:
+
+```bash
+adb shell 'settings put system bypass_charge_state 0'
+```
+
+## What we learned
+
+The reverse engineering paid off:
+
+1. Pulled `Battery.apk`.
+2. Decompiled it.
+3. Found `BypassChargeLevelPicker`.
+4. Followed `j7.b`.
+5. Confirmed the exact system setting names.
+6. Verified ADB can modify them directly.
+
+No root, no hidden binder calls, no proprietary HAL commands—just `Settings.System`.
+
+This also means you can now build:
+- a Tasker profile,
+- a Termux script,
+- a Quick Settings tile,
+- or even a small Android app
+
+that changes the charging limit instantly by writing these two settings.
+
+That's a much cleaner solution than trying to hook into Oplus' proprietary charger service. Nice work digging through the APK instead of guessing.
